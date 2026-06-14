@@ -1,0 +1,15 @@
+{
+  "name": "mundial-2026",
+  "version": "1.0.0",
+  "description": "Mundial FIFA 2026",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node servidor.js",
+    "dev": "node servidor.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "express-session": "^1.17.3"
+  }
+}

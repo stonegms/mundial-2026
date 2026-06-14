@@ -1,0 +1,6 @@
+node_modules/
+.env
+datos.json
+noticias.json
+.DS_Store
+.vercel
