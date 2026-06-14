@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundial FIFA 2026 - En Vivo</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:Arial,sans-serif;background:#f5f5f5;color:#333;}
+        .container{max-width:1200px;margin:0 auto;padding:20px;}
+        header{background:linear-gradient(135deg,#0052cc 0%,#003d99 100%);color:white;padding:30px;border-radius:10px;margin-bottom:30px;text-align:center;}
+        header h1{font-size:2.5em;margin-bottom:10px;}
+        header p{font-size:1.1em;}
+        nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+        nav button{padding:12px 20px;background:#0052cc;color:white;border:none;border-radius:5px;cursor:pointer;font-size:16px;font-weight:bold;transition:background 0.3s;}
+        nav button:hover{background:#003d99;}
+        nav button.active{background:#00d4ff;}
+        .content{display:none;}
+        .content.active{display:block;}
+        .status-bar{background:white;padding:20px;border-radius:5px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .status-bar div{display:inline-block;margin-right:30px;}
+        .status-bar strong{color:#0052cc;}
+        .match-card{background:white;padding:20px;margin-bottom:15px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1);cursor:pointer;transition:transform 0.2s;}
+        .match-card:hover{transform:translateY(-5px);box-shadow:0 5px 20px rgba(0,0,0,0.2);}
+        .match-header{display:flex;justify-content:space-between;align-items:center;font-weight:bold;}
+        .match-details{display:none;margin-top:15px;padding-top:15px;border-top:1px solid #ddd;}
+        .match-details.show{display:block;}
+        table{width:100%;border-collapse:collapse;margin-top:10px;}
+        table th,table td{padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+        table th{background:#0052cc;color:white;}
+        .logout-btn{background:#ff6b6b;padding:12px 20px;color:white;border:none;border-radius:5px;cursor:pointer;float:right;margin-top:10px;}
+        .logout-btn:hover{background:#ff5252;}
+        .group-card{background:white;padding:15px;margin-bottom:10px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .news-card{background:white;padding:15px;margin-bottom:15px;border-radius:5px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+        .news-card strong{color:#0052cc;}
+        .prediction-card{background:#e3f2fd;padding:15px;margin-bottom:10px;border-radius:5px;border-left:4px solid #0052cc;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚽ MUNDIAL FIFA 2026</h1>
+            <p>Análisis en Vivo | Predicciones | Noticias</p>
+            <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+        </header>
+
+        <div class="status-bar">
+            <div><strong>Partidos Jugados:</strong> <span id="jugados">0</span></div>
+            <div><strong>Próximos:</strong> <span id="proximos">80</span></div>
+            <div><strong>Noticias:</strong> <span id="noticias-count">0</span></div>
+        </div>
+
+        <nav>
+            <button class="active" onclick="mostrarSeccion('inicio')">🏠 Inicio</button>
+            <button onclick="mostrarSeccion('partidos')">⚽ Partidos</button>
+            <button onclick="mostrarSeccion('grupos')">🏆 Grupos</button>
+            <button onclick="mostrarSeccion('noticias')">📰 Noticias</button>
+            <button onclick="mostrarSeccion('predicciones')">📊 Predicciones</button>
+        </nav>
+
+        <div id="inicio" class="content active">
+            <div class="status-bar">
+                <h2>Bienvenido al Mundial 2026</h2>
+                <p>Fase de Grupos: 11 de junio - 25 de junio, 2026</p>
+                <p>Total de Partidos: 80 | Total de Equipos: 48</p>
+                <p>Sedes: 16 ciudades en USA, México y Canadá</p>
+            </div>
+        </div>
+
+        <div id="partidos" class="content">
+            <h2>Partidos de la Fase de Grupos</h2>
+            <div id="partidos-list"></div>
+        </div>
+
+        <div id="grupos" class="content">
+            <h2>Grupos del Torneo</h2>
+            <div id="grupos-list"></div>
+        </div>
+
+        <div id="noticias" class="content">
+            <h2>Últimas Noticias</h2>
+            <div id="noticias-list"></div>
+        </div>
+
+        <div id="predicciones" class="content">
+            <h2>Predicciones por Grupo</h2>
+            <div id="predicciones-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+
+        async function verificarAutenticacion(){
+            try{
+                const response=await fetch(API_URL+'/session');
+                const data=await response.json();
+                if(!data.autenticado){window.location.href='/login';}
+            }catch(error){console.error('Error:',error);window.location.href='/login';}
+        }
+
+        async function cerrarSesion(){
+            if(confirm('¿Cerrar sesión?')){
+                await fetch(API_URL+'/logout');
+                window.location.href='/login';
+            }
+        }
+
+        function mostrarSeccion(id){
+            document.querySelectorAll('.content').forEach(el=>el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el=>el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function cargarDatos(){
+            try{
+                const stats=await fetch(API_URL+'/estadisticas').then(r=>r.json());
+                document.getElementById('jugados').textContent=stats.totalJugados;
+                document.getElementById('proximos').textContent=stats.totalProximos;
+            }catch(error){console.error('Error cargando estadísticas:',error);}
+        }
+
+        verificarAutenticacion();
+        cargarDatos();
+        setInterval(cargarDatos,30000);
+    </script>
+</body>
+</html>
